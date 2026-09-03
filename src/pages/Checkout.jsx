@@ -48,43 +48,70 @@ export default function Checkout() {
         Démo sans paiement réel : la commande est enregistrée en base (stock décrémenté) mais
         aucun processeur de paiement n'est connecté.
       </p>
-      <form className="c4l-card c4l-form" onSubmit={handleSubmit}>
-        <label>
-          Nom complet
-          <input
-            required
-            value={form.customerName}
-            onChange={(e) => setForm({ ...form, customerName: e.target.value })}
-          />
-        </label>
-        <label>
-          Email
-          <input
-            required
-            type="email"
-            value={form.customerEmail}
-            onChange={(e) => setForm({ ...form, customerEmail: e.target.value })}
-          />
-        </label>
-        <label>
-          Adresse de livraison
-          <textarea
-            required
-            rows={3}
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-          />
-        </label>
-        {error && <p className="c4l-error">{error}</p>}
-        <div className="c4l-cart-summary">
-          <p>
-            Total : <strong>{total.toFixed(2)} €</strong>
-          </p>
-          <button className="c4l-primary-btn" type="submit" disabled={submitting}>
-            {submitting ? "Envoi…" : "Confirmer la commande"}
-          </button>
-        </div>
-      </form>
+      <div className="c4l-checkout-grid">
+        <form className="c4l-card c4l-form" onSubmit={handleSubmit}>
+          <label>
+            Nom complet
+            <input
+              required
+              value={form.customerName}
+              onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+            />
+          </label>
+          <label>
+            Email
+            <input
+              required
+              type="email"
+              value={form.customerEmail}
+              onChange={(e) => setForm({ ...form, customerEmail: e.target.value })}
+            />
+          </label>
+          <label>
+            Adresse de livraison
+            <textarea
+              required
+              rows={3}
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
+          </label>
+          {error && <p className="c4l-error">{error}</p>}
+          <div className="c4l-cart-summary">
+            <p>
+              Total : <strong>{total.toFixed(2)} €</strong>
+            </p>
+            <button className="c4l-primary-btn" type="submit" disabled={submitting}>
+              {submitting ? "Envoi…" : "Confirmer la commande"}
+            </button>
+          </div>
+        </form>
+
+        <aside className="c4l-card c4l-order-summary">
+          <h2>Récapitulatif</h2>
+          <div className="c4l-cart-list">
+            {items.map((item) => (
+              <div key={item.productId} className="c4l-cart-row summary">
+                <div
+                  className="c4l-cart-thumb small"
+                  style={{ background: `linear-gradient(155deg, ${item.color || "#ccc"}, ${item.color || "#ccc"}99)` }}
+                >
+                  {item.image && <img src={item.image} alt={item.name} loading="lazy" />}
+                </div>
+                <div className="c4l-order-summary-info">
+                  <p className="c4l-order-summary-name">{item.name}</p>
+                  <p className="c4l-muted">Qté {item.quantity}</p>
+                </div>
+                <span className="c4l-price">{(item.price * item.quantity).toFixed(2)} €</span>
+              </div>
+            ))}
+          </div>
+          <div className="c4l-order-summary-total">
+            <span>Total</span>
+            <strong>{total.toFixed(2)} €</strong>
+          </div>
+        </aside>
+      </div>
     </main>
   );
 }

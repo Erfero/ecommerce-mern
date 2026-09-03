@@ -44,6 +44,7 @@ export default async function handler(req, res) {
         productId: product._id,
         name: product.name,
         price: product.price,
+        image: product.image,
         quantity,
       });
       total += product.price * quantity;

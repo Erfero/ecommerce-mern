@@ -13,7 +13,11 @@ export default function ProductCard({ product }) {
           className="c4l-product-thumb"
           style={{ background: `linear-gradient(155deg, ${product.color}, ${product.color}99)` }}
         >
-          <CategoryIcon category={product.category} />
+          {product.image ? (
+            <img src={product.image} alt={product.name} loading="lazy" />
+          ) : (
+            <CategoryIcon category={product.category} />
+          )}
         </div>
       </Link>
       <button

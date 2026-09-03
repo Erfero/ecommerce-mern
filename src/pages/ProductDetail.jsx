@@ -49,7 +49,11 @@ export default function ProductDetail() {
           className="c4l-product-thumb large"
           style={{ background: `linear-gradient(155deg, ${product.color}, ${product.color}99)` }}
         >
-          <CategoryIcon category={product.category} size={72} />
+          {product.image ? (
+            <img src={product.image} alt={product.name} />
+          ) : (
+            <CategoryIcon category={product.category} size={72} />
+          )}
         </div>
         <div className="c4l-card c4l-product-info">
           <div className="c4l-product-info-top">
@@ -100,7 +104,11 @@ export default function ProductDetail() {
                   className="c4l-product-thumb small"
                   style={{ background: `linear-gradient(155deg, ${p.color}, ${p.color}99)` }}
                 >
-                  <CategoryIcon category={p.category} size={28} />
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} loading="lazy" />
+                  ) : (
+                    <CategoryIcon category={p.category} size={28} />
+                  )}
                 </div>
                 <div>
                   <p className="c4l-related-name">{p.name}</p>

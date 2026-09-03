@@ -22,6 +22,12 @@ export default function Cart() {
       <div className="c4l-card c4l-cart-list">
         {items.map((item) => (
           <div key={item.productId} className="c4l-cart-row">
+            <div
+              className="c4l-cart-thumb"
+              style={{ background: `linear-gradient(155deg, ${item.color || "#ccc"}, ${item.color || "#ccc"}99)` }}
+            >
+              {item.image && <img src={item.image} alt={item.name} loading="lazy" />}
+            </div>
             <div>
               <strong>{item.name}</strong>
               <p className="c4l-muted">{item.price.toFixed(2)} € / unité</p>

@@ -31,7 +31,10 @@ export default function OrderConfirmation() {
         <div className="c4l-cart-list">
           {order.items.map((item) => (
             <div key={item.name} className="c4l-cart-row confirmation">
-              <span>
+              <div className="c4l-cart-thumb small">
+                {item.image && <img src={item.image} alt={item.name} loading="lazy" />}
+              </div>
+              <span className="c4l-confirmation-name">
                 {item.quantity}× {item.name}
               </span>
               <span className="c4l-price">{(item.price * item.quantity).toFixed(2)} €</span>
