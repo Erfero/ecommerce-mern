@@ -4,12 +4,14 @@ import { WishlistProvider } from "./context/WishlistContext";
 import { ThemeProvider } from "./useTheme";
 import { LangProvider } from "./useI18n";
 import Header from "./components/Header";
+import MiniCartDrawer from "./components/MiniCartDrawer";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Favorites from "./pages/Favorites";
+import TrackOrder from "./pages/TrackOrder";
 import "./App.css";
 
 export default function App() {
@@ -21,6 +23,7 @@ export default function App() {
         <BrowserRouter>
           <div className="c4l-shell">
             <Header />
+            <MiniCartDrawer />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/produits/:slug" element={<ProductDetail />} />
@@ -28,6 +31,7 @@ export default function App() {
               <Route path="/panier" element={<Cart />} />
               <Route path="/commande" element={<Checkout />} />
               <Route path="/confirmation/:id" element={<OrderConfirmation />} />
+              <Route path="/suivi" element={<TrackOrder />} />
             </Routes>
             <footer className="c4l-footer">
               Construit par Erféro Keoula —{" "}

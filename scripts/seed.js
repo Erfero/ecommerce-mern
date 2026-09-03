@@ -1,7 +1,8 @@
 import dns from "node:dns";
 import mongoose from "mongoose";
 import Product from "../lib/models/Product.js";
-import { SEED_PRODUCTS } from "../lib/seedProducts.js";
+import Coupon from "../lib/models/Coupon.js";
+import { SEED_PRODUCTS, SEED_COUPONS } from "../lib/seedProducts.js";
 
 // Contournement d'un souci de résolution DNS SRV de Node sous Windows dans cet
 // environnement (l'OS résout correctement via nslookup, mais le résolveur
@@ -18,7 +19,10 @@ async function run() {
   for (const p of SEED_PRODUCTS) {
     await Product.updateOne({ slug: p.slug }, { $set: p }, { upsert: true });
   }
-  console.log(`Seed terminé : ${SEED_PRODUCTS.length} produits.`);
+  for (const c of SEED_COUPONS) {
+    await Coupon.updateOne({ code: c.code }, { $set: { ...c, active: true } }, { upsert: true });
+  }
+  console.log(`Seed terminé : ${SEED_PRODUCTS.length} produits, ${SEED_COUPONS.length} codes promo.`);
   await mongoose.disconnect();
 }
 

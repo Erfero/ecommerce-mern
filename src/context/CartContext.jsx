@@ -11,6 +11,7 @@ export function CartProvider({ children }) {
       return [];
     }
   });
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -36,6 +37,7 @@ export function CartProvider({ children }) {
         },
       ];
     });
+    setDrawerOpen(true);
   };
 
   const updateQuantity = (productId, quantity) => {
@@ -57,7 +59,19 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, updateQuantity, removeItem, clearCart, total, count }}
+      value={{
+        items,
+        addItem,
+        updateQuantity,
+        removeItem,
+        clearCart,
+        total,
+        count,
+        isDrawerOpen,
+        openDrawer: () => setDrawerOpen(true),
+        closeDrawer: () => setDrawerOpen(false),
+        toggleDrawer: () => setDrawerOpen((v) => !v),
+      }}
     >
       {children}
     </CartContext.Provider>

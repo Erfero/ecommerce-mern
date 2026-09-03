@@ -1,6 +1,8 @@
 import { connectDB } from "../../lib/db.js";
 import Product from "../../lib/models/Product.js";
 import Order from "../../lib/models/Order.js";
+import Coupon from "../../lib/models/Coupon.js";
+import { computeDiscount } from "../../lib/coupon.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,7 +10,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { items, customerName, customerEmail, address } = req.body || {};
+  const { items, customerName, customerEmail, address, couponCode } = req.body || {};
 
   if (!Array.isArray(items) || items.length === 0) {
     res.status(400).json({ message: "Le panier est vide" });
@@ -27,7 +29,7 @@ export default async function handler(req, res) {
     const productById = new Map(products.map((p) => [String(p._id), p]));
 
     const orderItems = [];
-    let total = 0;
+    let subtotal = 0;
 
     for (const item of items) {
       const product = productById.get(String(item.productId));
@@ -47,8 +49,24 @@ export default async function handler(req, res) {
         image: product.image,
         quantity,
       });
-      total += product.price * quantity;
+      subtotal += product.price * quantity;
     }
+
+    // Coupon is re-validated server-side — the client-displayed discount is
+    // never trusted as-is.
+    let discount = 0;
+    let appliedCode;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: String(couponCode).trim().toUpperCase(), active: true }).lean();
+      if (!coupon) {
+        res.status(400).json({ message: "Code promo invalide ou expiré" });
+        return;
+      }
+      discount = computeDiscount(coupon, subtotal);
+      appliedCode = coupon.code;
+    }
+
+    const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
 
     for (const item of orderItems) {
       await Product.updateOne({ _id: item.productId }, { $inc: { stock: -item.quantity } });
@@ -56,6 +74,9 @@ export default async function handler(req, res) {
 
     const order = await Order.create({
       items: orderItems,
+      subtotal,
+      discount,
+      couponCode: appliedCode,
       total,
       customerName,
       customerEmail,

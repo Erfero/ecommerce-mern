@@ -6,7 +6,7 @@ import { useTheme } from "../useTheme";
 import { useI18n } from "../useI18n";
 
 export default function Header() {
-  const { count } = useCart();
+  const { count, toggleDrawer } = useCart();
   const { ids } = useWishlist();
   const { theme, toggleTheme } = useTheme();
   const { lang, t, toggleLang } = useI18n();
@@ -49,12 +49,15 @@ export default function Header() {
         <button type="button" className="c4l-icon-btn" onClick={toggleLang} aria-label="lang">
           {lang === "fr" ? "EN" : "FR"}
         </button>
+        <Link to="/suivi" className="c4l-track-link">
+          {t("trackOrderNav")}
+        </Link>
         <Link to="/favoris" className="c4l-cart-link">
           <HeartIcon size={16} /> {ids.length > 0 && <span className="c4l-cart-badge">{ids.length}</span>}
         </Link>
-        <Link to="/panier" className="c4l-cart-link">
+        <button type="button" className="c4l-cart-link" onClick={toggleDrawer}>
           {t("cart")} {count > 0 && <span className="c4l-cart-badge">{count}</span>}
-        </Link>
+        </button>
       </div>
     </header>
   );

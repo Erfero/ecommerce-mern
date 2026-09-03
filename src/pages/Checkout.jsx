@@ -1,14 +1,22 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { createOrder } from "../api";
+import { createOrder, validateCoupon } from "../api";
+import { useI18n } from "../useI18n";
+import { TagIcon } from "../icons";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [form, setForm] = useState({ customerName: "", customerEmail: "", address: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponState, setCouponState] = useState("idle");
 
   if (items.length === 0) {
     return (
@@ -22,6 +30,31 @@ export default function Checkout() {
     );
   }
 
+  const finalTotal = coupon ? coupon.total : total;
+
+  const handleApplyCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+    setCouponError("");
+    setCouponState("checking");
+    try {
+      const result = await validateCoupon(couponInput.trim(), total);
+      setCoupon(result);
+      setCouponState("applied");
+    } catch (err) {
+      setCoupon(null);
+      setCouponState("idle");
+      setCouponError(err.message);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponInput("");
+    setCouponError("");
+    setCouponState("idle");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -30,6 +63,7 @@ export default function Checkout() {
       const payload = {
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         ...form,
+        ...(coupon ? { couponCode: coupon.code } : {}),
       };
       const { orderId } = await createOrder(payload);
       clearCart();
@@ -79,7 +113,7 @@ export default function Checkout() {
           {error && <p className="c4l-error">{error}</p>}
           <div className="c4l-cart-summary">
             <p>
-              Total : <strong>{total.toFixed(2)} €</strong>
+              Total : <strong>{finalTotal.toFixed(2)} €</strong>
             </p>
             <button className="c4l-primary-btn" type="submit" disabled={submitting}>
               {submitting ? "Envoi…" : "Confirmer la commande"}
@@ -106,9 +140,50 @@ export default function Checkout() {
               </div>
             ))}
           </div>
+
+          <div className="c4l-coupon-box">
+            {coupon ? (
+              <div className="c4l-coupon-applied">
+                <span>
+                  <TagIcon size={14} /> {coupon.code} {t("couponApplied")}
+                </span>
+                <button type="button" className="c4l-coupon-remove" onClick={removeCoupon}>
+                  {t("couponRemove")}
+                </button>
+              </div>
+            ) : (
+              <form className="c4l-coupon-form" onSubmit={handleApplyCoupon}>
+                <label htmlFor="coupon-input">{t("couponLabel")}</label>
+                <div className="c4l-coupon-row">
+                  <input
+                    id="coupon-input"
+                    type="text"
+                    placeholder={t("couponPlaceholder")}
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
+                  />
+                  <button type="submit" disabled={couponState === "checking"}>
+                    {couponState === "checking" ? t("couponApplying") : t("couponApply")}
+                  </button>
+                </div>
+                {couponError && <p className="c4l-error small">{couponError}</p>}
+              </form>
+            )}
+          </div>
+
           <div className="c4l-order-summary-total">
-            <span>Total</span>
-            <strong>{total.toFixed(2)} €</strong>
+            <span>{t("subtotalLabel")}</span>
+            <span>{total.toFixed(2)} €</span>
+          </div>
+          {coupon && (
+            <div className="c4l-order-summary-total discount">
+              <span>{t("discountLabel")}</span>
+              <span>-{coupon.discount.toFixed(2)} €</span>
+            </div>
+          )}
+          <div className="c4l-order-summary-total grand">
+            <span>{t("totalLabel")}</span>
+            <strong>{finalTotal.toFixed(2)} €</strong>
           </div>
         </aside>
       </div>
